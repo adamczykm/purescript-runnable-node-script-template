@@ -1,9 +1,14 @@
 module Main where
 
-import Prelude
+import Control.Applicative (pure)
+import Control.Apply ((<*>))
 import Data.Array (reverse)
 import Data.Either (Either(..))
+import Data.Function (($))
+import Data.Functor ((<$>))
 import Data.Maybe (Maybe(..))
+import Data.Semigroup ((<>))
+import Data.Unit (Unit, unit)
 import Effect (Effect)
 import Effect.Console (logShow)
 import Node.Yargs.Applicative (flag, yarg, runY)
