@@ -22,7 +22,7 @@ A simple Purescript project template using webpack and yargs for creating one-fi
     $ pulp build
 ```
 
-4. Make sure you have `sed` installed and it is available under `sed` command.
+4. Make sure you have `sed` and `node` installed and they are available in $PATH.
 
 5. Track changes to your project and have it automatically recompiled into an bundled executable node scripts:
 
@@ -33,6 +33,12 @@ A simple Purescript project template using webpack and yargs for creating one-fi
 Webpack will bundle the script only when ./entry.js deps are changed.
 
 Note: It works great with psc-ide.
+
+6. Your script is in under: `./dist/node.js`. It is already standalone & executable:
+
+```bash
+    $ ./dist/node.js
+```
 
 ### Credits
 
