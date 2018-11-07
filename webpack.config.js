@@ -5,7 +5,7 @@ const webpack = require('webpack');
 const exec = require('child_process').exec;
 
 const destDir = path.resolve(__dirname, 'dist');
-const bundleFileName = "node.js";
+const bundleFileName = "cli.js";
 const destPath = path.join(destDir, bundleFileName);
 
 module.exports = {
@@ -23,7 +23,7 @@ module.exports = {
   },
 
   plugins: [
-    // just make the output bundle executable via node
+    new webpack.BannerPlugin({ banner: "#!/usr/bin/env node", raw: true }),
     new NodeExecPlugin()
   ]
 
@@ -36,10 +36,8 @@ function NodeExecPlugin() {
 NodeExecPlugin.prototype.apply = function(compiler) {
 
   compiler.hooks.afterEmit.tap("make-node-exec", () => {
-    exec(`{ echo '#!/usr/bin/env node'; sed -e '1!b' -e '/function(modules)/!d' ${destPath}; } > ${destPath}.tmp && \
-            mv ${destPath}.tmp ${destPath} && \
-            chmod u+x ${destPath}  && \
-            echo 'Successfully created node executable at ${destPath}.'`,
+    exec(`chmod u+x ${destPath}  && \
+          echo 'Successfully created node executable at ${destPath}.'`,
          function(error, stdout, stderr){
            if(error){
              console.log(error, stderr);

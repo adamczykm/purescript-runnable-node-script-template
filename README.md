@@ -34,10 +34,10 @@ Webpack will bundle the script only when ./entry.js deps are changed.
 
 Note: It works great with psc-ide.
 
-6. Your script is in under: `./dist/node.js`. It is already standalone & executable:
+6. Your script is in under: `./dist/cli.js`. It is already standalone & executable:
 
 ```bash
-    $ ./dist/node.js
+    $ ./dist/cli.js
 ```
 
 ### Credits
