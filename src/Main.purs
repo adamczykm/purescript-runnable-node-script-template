@@ -1,27 +1,69 @@
 module Main where
 
-import Control.Applicative (pure)
-import Control.Apply ((<*>))
-import Data.Array (reverse)
-import Data.Either (Either(..))
-import Data.Function (($))
+import CliTypes (Config(..), ConfigRec, showConfig)
+import Control.Apply ((*>), (<*>))
+import Control.Bind (bind, discard)
 import Data.Functor ((<$>))
-import Data.Maybe (Maybe(..))
+import Data.List (length)
+import Data.Maybe (Maybe(..), maybe)
 import Data.Semigroup ((<>))
-import Data.Unit (Unit, unit)
+import Data.Show (show)
+import Data.Unit (Unit)
+import Data.Validation.Semigroup (unV)
 import Effect (Effect)
-import Effect.Console (logShow)
-import Node.Yargs.Applicative (flag, yarg, runY)
-import Node.Yargs.Setup (example, usage)
+import Effect.Console (log)
+import Node.Commando (Opt(Opt))
+import Node.Optlicative (Optlicative, Preferences, defaultPreferences, flag, logErrors, optlicate, string, many)
 
-app :: Array String -> Boolean -> Effect Unit
-app [] _     = pure unit
-app ss false = logShow ss
-app ss true  = logShow (reverse ss)
+configRec :: Record ConfigRec
+configRec =
+  { one: Opt optOne
+    { two: Opt optTwo {}
+    }
+  }
 
+optOne :: Optlicative Config
+optOne = (\ output names help -> ConfigOne {output, names, help})
+  <$> string "output" Nothing
+  <*> many (string "name" Nothing)
+  <*> flag "help" (Just 'h')
+
+optTwo :: Optlicative Config
+optTwo = (\ color help -> ConfigTwo {color, help})
+  <$> flag "color" (Just 'c')
+  <*> flag "help" (Just 'h')
+
+globalConfig :: Optlicative Config
+globalConfig = (\ help version say -> GlobalConfig {help, version, say})
+  <$> flag "help" (Just 'h')
+  <*> flag "version" (Just 'v')
+  <*> string "say" Nothing
+
+myPrefs :: Preferences Config
+myPrefs = defaultPreferences {globalOpts = globalConfig}
+
+-- | Try running the following:
+-- | 1. `pulp test -- one`
+-- | 2. `pulp test -- one --output`
+-- | 3. `pulp test -- one --output blah`
+-- | 4. `pulp test -- one two`
+-- | 5. `pulp test -- one two --help`
+-- | 5. `pulp test -- --version`
+-- | 6. `pulp test -- one --name "John" --name "Bob" --name "Billy"
+-- | 7. `pulp test -- --version`
+-- | 8. `pulp test -- --version --say doh`
+-- | 9. `pulp test`
 main :: Effect Unit
 main = do
-  let setup = usage "$0 -w Word1 -w Word2"
-              <> example "$0 -w Hello -w World" "Say hello!"
-
-  runY setup $ app <$> yarg "w" ["word"] (Just "A word") (Right "At least one word is required") false <*> flag "r" [] (Just "Reverse the words")
+  {cmd, value} <- optlicate configRec myPrefs
+  maybe
+    (log "No path parsed")
+    (\ x -> log "Path parsed" *> log x)
+    cmd
+  unV
+    (\ x -> do
+      log "Errors found: "
+      log (show (length x) <> " errors")
+      logErrors x)
+    (\ x -> log "Value found: " *> log (showConfig x))
+    value

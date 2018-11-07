@@ -1,6 +1,6 @@
 # purescript-runnable-node-script-template
 
-A simple Purescript project template using webpack and yargs for creating one-file exectuble node scripts with CLI.
+A simple Purescript project template using webpack and purescript-optlicative for creating one-file executable node scripts with CLI.
 
 ### Usage
 
